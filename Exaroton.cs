@@ -611,8 +611,143 @@ public class Exaroton
         var fileInfo = JsonSerializer.Deserialize<FileInformationResponse>(responseString, jsonOptions); // Deserialize the response into a FileInformationResponse object
         return fileInfo!;
     }
-
-    // Implement the file data methods later
+    
+    /// <summary>
+    /// Get file information and save it to the specified path.
+    /// </summary>
+    /// <param name="serverId"></param>
+    /// <param name="filePath"></param>
+    /// <param name="savePath"></param>
+    public void GetFileData(string serverId, string filePath, string savePath)
+    {
+        var fileBytes = sharedClient.GetByteArrayAsync($"{baseUri}/servers/{serverId}/files/data/{filePath}/").Result; // Make the GET request to download the file
+        File.WriteAllBytes(savePath, fileBytes); // Save the downloaded file to the specified path
+    }
+    
+    /// <summary>
+    /// Get file information and save it to the specified path.
+    /// </summary>
+    /// <param name="server"></param>
+    /// <param name="filePath"></param>
+    /// <param name="savePath"></param>
+    public void GetFileData(Server server, string filePath, string savePath)
+    {
+        try
+        {
+            var fileBytes = sharedClient.GetByteArrayAsync($"{baseUri}/servers/{server.Id}/files/data/{filePath}/")
+                .Result; // Make the GET request to download the file
+            File.WriteAllBytes(savePath, fileBytes); // Save the downloaded file to the specified path
+        }
+        catch (Exception e)
+        {
+            throw new ExarotonException($"An error occurred while getting file data: {e.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Write file data to the specified server and path. 
+    /// </summary>
+    /// <param name="serverId"></param>
+    /// <param name="path"></param>
+    /// <param name="fileData"></param>
+    /// <param name="folder"></param>
+    /// <returns>GenericResponse</returns>
+    public GenericResponse WriteFileData(string serverId, string path, byte[] fileData)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, $"{baseUri}/servers/{serverId}/files/data/{path}/"); // Create the PUT request to upload the file
+        var content = new ByteArrayContent(fileData); // Create the request content with the file data
+        request.Content = content; // Set the request content
+        
+        var response = sharedClient.SendAsync(request).Result; // Make the POST request to upload the file and get the response
+        var responseString = response.Content.ReadAsStringAsync().Result; // Read the response content as a string
+        var writeFileResponse = JsonSerializer.Deserialize<GenericResponse>(responseString, jsonOptions); // Deserialize the response into a GenericResponse object
+        return writeFileResponse!;
+    }
+    
+    /// <summary>
+    /// Write file data to the specified server and path. 
+    /// </summary>
+    /// <param name="server"></param>
+    /// <param name="path"></param>
+    /// <param name="fileData"></param>
+    /// <returns>GenericResponse</returns>
+    public GenericResponse WriteFileData(Server server, string path, byte[] fileData)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, $"{baseUri}/servers/{server.Id}/files/data/{path}/"); // Create the PUT request to upload the file
+        var content = new ByteArrayContent(fileData); // Create the request content with the file data
+        request.Content = content; // Set the request content
+        
+        var response = sharedClient.SendAsync(request).Result; // Make the POST request to upload the file and get the response
+        var responseString = response.Content.ReadAsStringAsync().Result; // Read the response content as a string
+        var writeFileResponse = JsonSerializer.Deserialize<GenericResponse>(responseString, jsonOptions); // Deserialize the response into a GenericResponse object
+        return writeFileResponse!;
+    }
+    
+    /// <summary>
+    /// Write a folder to the specified server and path.
+    /// </summary>
+    /// <param name="serverId"></param>
+    /// <param name="path"></param>
+    /// <returns>GenericResponse</returns>
+    public GenericResponse WriteFolder(string serverId, string path)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, $"{baseUri}/servers/{serverId}/files/data/{path}/"); // Create the PUT request to upload the folder
+        var content = new ByteArrayContent(Array.Empty<byte>()); // Create empty content for folder upload
+        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("inode/directory"); // Set content type to application/zip
+        request.Content = content; // Set the request content
+        
+        var response = sharedClient.SendAsync(request).Result; // Make the POST request to upload the folder and get the response
+        var responseString = response.Content.ReadAsStringAsync().Result; // Read the response content as a string
+        var writeFolderResponse = JsonSerializer.Deserialize<GenericResponse>(responseString, jsonOptions); // Deserialize the response into a GenericResponse object
+        return writeFolderResponse!;
+    }
+    
+    /// <summary>
+    /// Write a folder to the specified server and path.
+    /// </summary>
+    /// <param name="server"></param>
+    /// <param name="path"></param>
+    /// <returns>GenericResponse</returns>
+    public GenericResponse WriteFolder(Server server, string path)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, $"{baseUri}/servers/{server.Id}/files/data/{path}/"); // Create the PUT request to upload the folder
+        var content = new ByteArrayContent(Array.Empty<byte>()); // Create empty content for folder upload
+        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("inode/directory"); // Set content type to application/zip
+        request.Content = content; // Set the request content
+        
+        var response = sharedClient.SendAsync(request).Result; // Make the POST request to upload the folder and get the response
+        var responseString = response.Content.ReadAsStringAsync().Result; // Read the response content as a string
+        var writeFolderResponse = JsonSerializer.Deserialize<GenericResponse>(responseString, jsonOptions); // Deserialize the response into a GenericResponse object
+        return writeFolderResponse!;
+    }
+    
+    /// <summary>
+    /// Delete a file from the specified server and path.
+    /// </summary>
+    /// <param name="serverId"></param>
+    /// <param name="path"></param>
+    /// <returns>GenericResponse</returns>
+    public GenericResponse DeleteFile(string serverId, string path)
+    {
+        var content = new StringContent(""); // Create empty content for DELETE request
+        string responseString = DeleteRequest($"servers/{serverId}/files/data/{path}/", content).Result; // Make the DELETE request to delete the file
+        var deleteFileResponse = JsonSerializer.Deserialize<GenericResponse>(responseString, jsonOptions); // Deserialize the response into a GenericResponse object
+        return deleteFileResponse!;
+    }
+    
+    /// <summary>
+    /// Delete a file from the specified server and path.
+    /// </summary>
+    /// <param name="server"></param>
+    /// <param name="path"></param>
+    /// <returns>GenericResponse</returns>
+    public GenericResponse DeleteFile(Server server, string path)
+    {
+        var content = new StringContent(""); // Create empty content for DELETE request
+        string responseString = DeleteRequest($"servers/{server.Id}/files/data/{path}/", content).Result; // Make the DELETE request to delete the file
+        var deleteFileResponse = JsonSerializer.Deserialize<GenericResponse>(responseString, jsonOptions); // Deserialize the response into a GenericResponse object
+        return deleteFileResponse!;
+    }
     
     // Config file methods
     
