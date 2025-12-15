@@ -22,6 +22,11 @@ interface IExarotonResponse
     public string Error { get; set; }
 }
 
+public class ExarotonException : Exception
+{
+    public ExarotonException(string message) : base(message) { }
+}
+
 public class Players
 {
     public int Max { get; set; }
