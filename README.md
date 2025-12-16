@@ -4,6 +4,9 @@
 
 With this package, it is now as easy as creating an `Exaroton` object. The object will provide methods that makes it easy to interact and manage your exaroton-hosted Minecraft servers!
 
+## How to Get
+You can download the latest DLL provided in the releases page, or via NuGet with `dotnet add package Exaroton`
+
 ## How to Use
 Simply create an `Exaroton` object and input your API key, which can be found [here](https://exaroton.com/account/), as a parameter.:
 
